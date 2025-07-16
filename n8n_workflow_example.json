@@ -1,0 +1,173 @@
+{
+  "name": "AI DNAs Blog Automation",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 9 * * 1"
+            }
+          ]
+        }
+      },
+      "id": "cron-trigger",
+      "name": "Weekly Content Schedule",
+      "type": "n8n-nodes-base.cron",
+      "typeVersion": 1,
+      "position": [240, 300]
+    },
+    {
+      "parameters": {
+        "model": "gpt-3.5-turbo",
+        "messages": {
+          "messageValues": [
+            {
+              "role": "system",
+              "message": "You are a technical content writer for AI DNAs. Write engaging blog posts about AI, automation, and technology. Include practical insights and real-world applications."
+            },
+            {
+              "role": "user", 
+              "message": "Write a blog post about the latest trends in AI automation. Make it around 800 words, include an engaging title, and provide a brief excerpt."
+            }
+          ]
+        }
+      },
+      "id": "chatgpt-content",
+      "name": "Generate AI Content",
+      "type": "n8n-nodes-base.openAi",
+      "typeVersion": 1,
+      "position": [460, 300]
+    },
+    {
+      "parameters": {
+        "functionCode": "// Parse the AI-generated content\nconst aiResponse = $input.first().json.choices[0].message.content;\n\n// Extract title (first line)\nconst lines = aiResponse.split('\\n').filter(line => line.trim());\nconst title = lines[0].replace(/^#*\\s*/, '').trim();\n\n// Extract excerpt (first paragraph after title)\nlet excerpt = '';\nlet content = aiResponse;\n\nfor (let i = 1; i < lines.length; i++) {\n  if (lines[i].length > 50) {\n    excerpt = lines[i].substring(0, 200) + '...';\n    break;\n  }\n}\n\n// Format for API\nreturn {\n  json: {\n    title: title,\n    content: content,\n    excerpt: excerpt,\n    category_slug: 'ai-automation',\n    tags: 'AI, automation, technology, trends',\n    meta_description: excerpt.substring(0, 160),\n    is_featured: false\n  }\n};"
+      },
+      "id": "format-content",
+      "name": "Format Content",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [680, 300]
+    },
+    {
+      "parameters": {
+        "url": "http://127.0.0.1:8000/api/v1/blog/create-post/",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Token 7736327ffff7d1d22d4c9b5c1500d2d970b14689"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "title",
+              "value": "={{ $json.title }}"
+            },
+            {
+              "name": "content", 
+              "value": "={{ $json.content }}"
+            },
+            {
+              "name": "excerpt",
+              "value": "={{ $json.excerpt }}"
+            },
+            {
+              "name": "category_slug",
+              "value": "={{ $json.category_slug }}"
+            },
+            {
+              "name": "tags",
+              "value": "={{ $json.tags }}"
+            },
+            {
+              "name": "meta_description",
+              "value": "={{ $json.meta_description }}"
+            },
+            {
+              "name": "is_featured",
+              "value": "={{ $json.is_featured }}"
+            }
+          ]
+        }
+      },
+      "id": "create-blog-post",
+      "name": "Create Blog Post",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [900, 300]
+    },
+    {
+      "parameters": {
+        "functionCode": "// Log the successful creation\nconst response = $input.first().json;\n\nconsole.log('Blog post created successfully!');\nconsole.log('Title:', response.title);\nconsole.log('Slug:', response.slug);\nconsole.log('ID:', response.id);\n\nreturn {\n  json: {\n    success: true,\n    post_id: response.id,\n    post_url: `http://127.0.0.1:8000/blog/${response.slug}/`,\n    title: response.title,\n    message: 'Blog post created and published successfully!'\n  }\n};"
+      },
+      "id": "success-notification",
+      "name": "Success Notification",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [1120, 300]
+    }
+  ],
+  "connections": {
+    "Weekly Content Schedule": {
+      "main": [
+        [
+          {
+            "node": "Generate AI Content",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate AI Content": {
+      "main": [
+        [
+          {
+            "node": "Format Content", 
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Content": {
+      "main": [
+        [
+          {
+            "node": "Create Blog Post",
+            "type": "main", 
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Blog Post": {
+      "main": [
+        [
+          {
+            "node": "Success Notification",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "createdAt": "2025-07-16T07:58:00.000Z",
+  "updatedAt": "2025-07-16T07:58:00.000Z",
+  "settings": {
+    "timezone": "America/New_York"
+  },
+  "staticData": null,
+  "tags": ["AI DNAs", "Blog Automation", "Content Creation"]
+} 

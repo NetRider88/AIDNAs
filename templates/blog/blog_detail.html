@@ -1,0 +1,282 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ post.title }} - AI DNAs{% endblock %}
+
+{% block meta_description %}{{ post.meta_description|default:post.excerpt }}{% endblock %}
+
+{% block content %}
+<section class="py-20 bg-gray-900 min-h-screen">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Blog Post Header -->
+        <div class="mb-12">
+            {% if post.category %}
+            <div class="mb-4">
+                <span class="inline-block bg-purple-600 text-white px-4 py-2 rounded-full text-sm font-medium">
+                    {{ post.category.name }}
+                </span>
+            </div>
+            {% endif %}
+            
+            <h1 class="text-4xl md:text-5xl font-bold text-white mb-6 leading-tight">{{ post.title }}</h1>
+            
+            <div class="flex flex-wrap items-center gap-6 text-gray-400 mb-6">
+                <div class="flex items-center">
+                    <i class="fas fa-calendar mr-2"></i>
+                    <span>{{ post.published_date|date:"F d, Y" }}</span>
+                </div>
+                <div class="flex items-center">
+                    <i class="fas fa-clock mr-2"></i>
+                    <span>{{ post.reading_time }} min read</span>
+                </div>
+                <div class="flex items-center">
+                    <i class="fas fa-eye mr-2"></i>
+                    <span>{{ post.views }} views</span>
+                </div>
+            </div>
+            
+            {% if post.excerpt %}
+            <p class="text-xl text-gray-300 leading-relaxed">{{ post.excerpt }}</p>
+            {% endif %}
+        </div>
+        
+        <!-- Featured Image -->
+        {% if post.featured_image %}
+        <div class="mb-12">
+            <img src="{{ post.featured_image.url }}" alt="{{ post.featured_image_alt|default:post.title }}" 
+                 class="w-full h-64 md:h-96 object-cover rounded-xl shadow-2xl">
+        </div>
+        {% endif %}
+        
+        <!-- Blog Content -->
+        <div class="prose prose-lg prose-invert max-w-none mb-12">
+            <div class="text-gray-300 leading-relaxed">
+                {{ post.content|linebreaks }}
+            </div>
+        </div>
+        
+        <!-- Tags -->
+        {% if post.tags %}
+        <div class="mb-12">
+            <h3 class="text-lg font-semibold text-white mb-4">Tags</h3>
+            <div class="flex flex-wrap gap-2">
+                {% for tag in post.get_tags_list %}
+                <a href="{% url 'blog:blog_by_tag' tag %}" 
+                   class="bg-gray-700 hover:bg-gray-600 text-gray-300 px-3 py-1 rounded-full text-sm transition-colors">
+                    #{{ tag }}
+                </a>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+        
+        <!-- Social Share -->
+        <div class="border-t border-gray-700 pt-8 mb-12">
+            <h3 class="text-lg font-semibold text-white mb-4">Share this post</h3>
+            <div class="flex flex-wrap gap-3">
+                <!-- Copy Link Button -->
+                <button onclick="copyPostLink()" 
+                        class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg transition-colors flex items-center">
+                    <i class="fas fa-link mr-2"></i>Copy Link
+                </button>
+                
+                <!-- LinkedIn -->
+                <a href="https://www.linkedin.com/sharing/share-offsite/?url={{ request.build_absolute_uri|urlencode }}&title={{ post.title|urlencode }}&summary={{ post.excerpt|urlencode }}" 
+                   target="_blank" 
+                   class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors flex items-center">
+                    <i class="fab fa-linkedin mr-2"></i>LinkedIn
+                </a>
+                
+                <!-- Twitter/X -->
+                <a href="https://twitter.com/intent/tweet?url={{ request.build_absolute_uri|urlencode }}&text={{ post.title|urlencode }}%20via%20@AIDNAs" 
+                   target="_blank"
+                   class="bg-gray-800 hover:bg-gray-700 text-white px-4 py-2 rounded-lg transition-colors flex items-center">
+                    <i class="fab fa-twitter mr-2"></i>Twitter
+                </a>
+                
+                <!-- Facebook -->
+                <a href="https://www.facebook.com/sharer/sharer.php?u={{ request.build_absolute_uri|urlencode }}&quote={{ post.title|urlencode }}" 
+                   target="_blank"
+                   class="bg-blue-800 hover:bg-blue-900 text-white px-4 py-2 rounded-lg transition-colors flex items-center">
+                    <i class="fab fa-facebook mr-2"></i>Facebook
+                </a>
+                
+                <!-- WhatsApp -->
+                <a href="https://wa.me/?text={{ post.title|urlencode }}%20{{ request.build_absolute_uri|urlencode }}" 
+                   target="_blank"
+                   class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition-colors flex items-center">
+                    <i class="fab fa-whatsapp mr-2"></i>WhatsApp
+                </a>
+                
+                <!-- Email -->
+                <a href="mailto:?subject={{ post.title|urlencode }}&body=Check%20out%20this%20article:%20{{ request.build_absolute_uri|urlencode }}" 
+                   class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg transition-colors flex items-center">
+                    <i class="fas fa-envelope mr-2"></i>Email
+                </a>
+            </div>
+            
+            <!-- Copy Success Message -->
+            <div id="copy-success" class="hidden mt-3 text-green-400 text-sm">
+                <i class="fas fa-check mr-1"></i>Link copied to clipboard!
+            </div>
+        </div>
+        
+        <!-- Navigation -->
+        <div class="border-t border-gray-700 pt-8 mb-12">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                {% if previous_post %}
+                <div>
+                    <p class="text-gray-400 text-sm mb-2">Previous Post</p>
+                    <a href="{% url 'blog:blog_detail' previous_post.slug %}" 
+                       class="text-primary-400 hover:text-primary-300 font-medium transition-colors">
+                        <i class="fas fa-arrow-left mr-2"></i>{{ previous_post.title }}
+                    </a>
+                </div>
+                {% endif %}
+                
+                {% if next_post %}
+                <div class="{% if not previous_post %}md:col-start-2{% endif %}">
+                    <p class="text-gray-400 text-sm mb-2">Next Post</p>
+                    <a href="{% url 'blog:blog_detail' next_post.slug %}" 
+                       class="text-primary-400 hover:text-primary-300 font-medium transition-colors">
+                        {{ next_post.title }}<i class="fas fa-arrow-right ml-2"></i>
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Related Posts -->
+{% if related_posts %}
+<section class="py-20 bg-gray-800">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-16">
+            <h2 class="text-3xl font-bold text-white mb-4">Related Posts</h2>
+            <p class="text-gray-400">More insights you might find interesting</p>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {% for related_post in related_posts %}
+            <article class="bg-gray-900 rounded-xl shadow-xl overflow-hidden transform hover:scale-105 transition-all duration-300 border border-gray-700 hover:border-primary-500">
+                {% if related_post.featured_image %}
+                <div class="h-48 overflow-hidden">
+                    <img src="{{ related_post.featured_image.url }}" alt="{{ related_post.title }}" class="w-full h-full object-cover">
+                </div>
+                {% else %}
+                <div class="h-48 bg-gradient-to-br from-purple-500 to-blue-600 flex items-center justify-center">
+                    <i class="fas fa-blog text-6xl text-white opacity-50"></i>
+                </div>
+                {% endif %}
+                
+                <div class="p-6">
+                    {% if related_post.category %}
+                    <span class="inline-block bg-purple-600 text-white px-3 py-1 rounded-full text-sm font-medium mb-2">
+                        {{ related_post.category.name }}
+                    </span>
+                    {% endif %}
+                    
+                    <h3 class="text-xl font-semibold text-white mb-2">{{ related_post.title }}</h3>
+                    <p class="text-gray-400 mb-4">{{ related_post.excerpt|truncatewords:15 }}</p>
+                    
+                    <div class="flex items-center justify-between text-sm text-gray-500">
+                        <span><i class="fas fa-clock mr-1"></i>{{ related_post.reading_time }} min read</span>
+                        <span>{{ related_post.published_date|date:"M d, Y" }}</span>
+                    </div>
+                    
+                    <a href="{% url 'blog:blog_detail' related_post.slug %}" class="inline-block mt-4 text-primary-400 hover:text-primary-300 font-medium transition-colors">
+                        Read More <i class="fas fa-arrow-right ml-1"></i>
+                    </a>
+                </div>
+            </article>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<!-- Back to Blog -->
+<section class="py-12 bg-gray-900">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <a href="{% url 'blog:blog_list' %}" 
+           class="inline-flex items-center bg-primary-600 hover:bg-primary-700 text-white px-8 py-3 rounded-lg font-semibold transition-colors">
+            <i class="fas fa-arrow-left mr-2"></i>Back to All Posts
+        </a>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Copy post link to clipboard
+async function copyPostLink() {
+    const url = window.location.href;
+    const copyButton = event.target.closest('button');
+    const successMessage = document.getElementById('copy-success');
+    
+    try {
+        // Try modern clipboard API first
+        if (navigator.clipboard && window.isSecureContext) {
+            await navigator.clipboard.writeText(url);
+        } else {
+            // Fallback for older browsers
+            const textArea = document.createElement('textarea');
+            textArea.value = url;
+            textArea.style.position = 'fixed';
+            textArea.style.left = '-999999px';
+            textArea.style.top = '-999999px';
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+            document.execCommand('copy');
+            textArea.remove();
+        }
+        
+        // Show success message
+        successMessage.classList.remove('hidden');
+        
+        // Update button text temporarily
+        const originalText = copyButton.innerHTML;
+        copyButton.innerHTML = '<i class="fas fa-check mr-2"></i>Copied!';
+        copyButton.classList.remove('bg-gray-600', 'hover:bg-gray-700');
+        copyButton.classList.add('bg-green-600', 'hover:bg-green-700');
+        
+        // Reset after 2 seconds
+        setTimeout(() => {
+            copyButton.innerHTML = originalText;
+            copyButton.classList.remove('bg-green-600', 'hover:bg-green-700');
+            copyButton.classList.add('bg-gray-600', 'hover:bg-gray-700');
+            successMessage.classList.add('hidden');
+        }, 2000);
+        
+    } catch (err) {
+        console.error('Failed to copy link: ', err);
+        alert('Failed to copy link. Please copy the URL manually from your browser.');
+    }
+}
+
+// Enhanced social sharing with better tracking
+function trackSocialShare(platform) {
+    // Track sharing events (can integrate with analytics later)
+    console.log(`Shared on ${platform}: {{ post.title }}`);
+}
+
+// Add click tracking to social share buttons
+document.addEventListener('DOMContentLoaded', function() {
+    const shareButtons = document.querySelectorAll('a[href*="linkedin.com"], a[href*="twitter.com"], a[href*="facebook.com"], a[href*="wa.me"], a[href*="mailto:"]');
+    
+    shareButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            let platform = 'unknown';
+            if (this.href.includes('linkedin')) platform = 'LinkedIn';
+            else if (this.href.includes('twitter')) platform = 'Twitter';
+            else if (this.href.includes('facebook')) platform = 'Facebook';
+            else if (this.href.includes('wa.me')) platform = 'WhatsApp';
+            else if (this.href.includes('mailto:')) platform = 'Email';
+            
+            trackSocialShare(platform);
+        });
+    });
+});
+</script>
+{% endblock %} 

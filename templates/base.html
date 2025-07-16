@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}AI DNAs{% endblock %}</title>
+    
+    <!-- Google Analytics 4 -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-DGBTY079VX"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-DGBTY079VX', {
+            page_title: document.title,
+            page_location: window.location.href,
+        });
+    </script>
+    
+    <!-- Meta Description -->
+    <meta name="description" content="{% block meta_description %}{{ profile.meta_description|default:'AI Developer specializing in automation and intelligent solutions' }}{% endblock %}">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#eff6ff',
+                            500: '#3b82f6',
+                            600: '#2563eb',
+                            700: '#1d4ed8',
+                            900: '#1e3a8a'
+                        },
+                        accent: {
+                            500: '#10b981',
+                            600: '#059669'
+                        }
+                    },
+                    fontFamily: {
+                        'sans': ['Inter', 'system-ui', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <!-- Simple Chat Widget -->
+    <style>
+        .chat-widget {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+        
+        .chat-button {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            transition: transform 0.3s;
+        }
+        
+        .chat-button:hover {
+            transform: scale(1.1);
+        }
+        
+        .chat-popup {
+            position: fixed;
+            bottom: 90px;
+            right: 20px;
+            width: 350px;
+            height: 500px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            display: none;
+            flex-direction: column;
+        }
+        
+        .chat-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px;
+            border-radius: 15px 15px 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .chat-messages {
+            flex: 1;
+            padding: 15px;
+            overflow-y: auto;
+            max-height: 350px;
+        }
+        
+        .chat-input {
+            padding: 15px;
+            border-top: 1px solid #eee;
+        }
+        
+        .chat-input input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 20px;
+            outline: none;
+        }
+        
+        .message {
+            margin: 10px 0;
+            padding: 10px 15px;
+            border-radius: 15px;
+            max-width: 80%;
+        }
+        
+        .message.bot {
+            background: #f0f0f0;
+            margin-right: auto;
+        }
+        
+        .message.user {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            margin-left: auto;
+        }
+    </style>
+    
+    <!-- Custom CSS -->
+    <style>
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .glass-effect {
+            backdrop-filter: blur(10px);
+            background-color: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .text-gradient {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .circle-1 {
+            animation: float 6s ease-in-out infinite;
+        }
+        .circle-2 {
+            animation: float 8s ease-in-out infinite reverse;
+        }
+        .circle-3 {
+            animation: float 10s ease-in-out infinite;
+        }
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            33% { transform: translateY(-20px) rotate(120deg); }
+            66% { transform: translateY(10px) rotate(240deg); }
+        }
+        .line-clamp-2 {
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        .line-clamp-3 {
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+    </style>
+    
+    {% block extra_head %}{% endblock %}
+</head>
+<body class="bg-gray-900 text-white">
+    <!-- Navigation -->
+    <nav class="fixed w-full z-50 glass-effect">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex-shrink-0">
+                    <a href="{% url 'main:home' %}" class="text-xl font-bold text-gradient">
+                        AI DNAs
+                    </a>
+                </div>
+                
+                <!-- Desktop Navigation -->
+                <div class="hidden md:block">
+                    <div class="ml-10 flex items-baseline space-x-4">
+                        <a href="{% url 'main:home' %}" class="hover:text-primary-400 px-3 py-2 rounded-md text-sm font-medium transition-colors">Home</a>
+                        <a href="{% url 'main:about' %}" class="hover:text-primary-400 px-3 py-2 rounded-md text-sm font-medium transition-colors">About</a>
+                        <a href="{% url 'projects:project_list' %}" class="hover:text-primary-400 px-3 py-2 rounded-md text-sm font-medium transition-colors">Projects</a>
+                        <a href="{% url 'blog:blog_list' %}" class="hover:text-primary-400 px-3 py-2 rounded-md text-sm font-medium transition-colors">Blog</a>
+                        <a href="{% url 'main:recruiter' %}" class="hover:text-primary-400 px-3 py-2 rounded-md text-sm font-medium transition-colors">Recruiter</a>
+                        <a href="{% url 'main:contact' %}" class="bg-primary-600 hover:bg-primary-700 px-4 py-2 rounded-md text-sm font-medium transition-colors">Contact</a>
+                    </div>
+                </div>
+                
+                <!-- Mobile menu button -->
+                <div class="md:hidden">
+                    <button type="button" class="mobile-menu-button">
+                        <i class="fas fa-bars text-xl"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Mobile Navigation -->
+        <div class="mobile-menu hidden md:hidden">
+            <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-gray-800">
+                <a href="{% url 'main:home' %}" class="block hover:text-primary-400 px-3 py-2 rounded-md text-base font-medium">Home</a>
+                <a href="{% url 'main:about' %}" class="block hover:text-primary-400 px-3 py-2 rounded-md text-base font-medium">About</a>
+                <a href="{% url 'projects:project_list' %}" class="block hover:text-primary-400 px-3 py-2 rounded-md text-base font-medium">Projects</a>
+                <a href="{% url 'blog:blog_list' %}" class="block hover:text-primary-400 px-3 py-2 rounded-md text-base font-medium">Blog</a>
+                <a href="{% url 'main:recruiter' %}" class="block hover:text-primary-400 px-3 py-2 rounded-md text-base font-medium">Recruiter</a>
+                <a href="{% url 'main:contact' %}" class="block bg-primary-600 hover:bg-primary-700 px-3 py-2 rounded-md text-base font-medium">Contact</a>
+            </div>
+        </div>
+    </nav>
+    
+    <!-- Main Content -->
+    <main class="pt-16">
+        {% if messages %}
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} mb-4 p-4 rounded-lg {% if message.tags == 'success' %}bg-green-100 text-green-700 border border-green-200{% elif message.tags == 'error' %}bg-red-100 text-red-700 border border-red-200{% else %}bg-blue-100 text-blue-700 border border-blue-200{% endif %}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+        
+        {% block content %}
+        {% endblock %}
+    </main>
+    
+    <!-- Newsletter Section -->
+    <section class="py-16 bg-gray-800">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <div class="bg-gradient-to-r from-primary-600 to-purple-600 p-8 rounded-2xl">
+                <h3 class="text-lg font-semibold mb-4">AI DNAs</h3>
+                <h2 class="text-3xl font-bold mb-4">Stay Updated with Latest AI & Automation Trends</h2>
+                <p class="text-gray-200 mb-6">Get insights on AI development, automation strategies, and cutting-edge technology directly to your inbox.</p>
+                
+                <form class="max-w-md mx-auto flex gap-4" id="newsletter-form">
+                    {% csrf_token %}
+                    <input type="email" 
+                           name="email" 
+                           placeholder="Enter your email" 
+                           class="flex-1 px-4 py-3 rounded-lg bg-white text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                           required>
+                    <button type="submit" 
+                            class="bg-primary-700 hover:bg-primary-800 px-6 py-3 rounded-lg font-semibold transition-colors">
+                        Subscribe
+                    </button>
+                </form>
+                
+                <div id="newsletter-message" class="mt-4 hidden"></div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Footer -->
+    <footer class="bg-gray-900 border-t border-gray-700">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <!-- About Section -->
+                <div class="md:col-span-2">
+                    <h3 class="text-lg font-semibold mb-4">AI DNAs</h3>
+                    <p class="text-gray-400 mb-4">Specialized in AI development, automation solutions, and intelligent systems that transform businesses and enhance productivity.</p>
+                    <div class="flex space-x-4">
+                        {% if profile.linkedin_url %}
+                        <a href="{{ profile.linkedin_url }}" target="_blank" class="text-gray-400 hover:text-primary-400 transition-colors">
+                            <i class="fab fa-linkedin text-xl"></i>
+                        </a>
+                        {% endif %}
+                        {% if profile.github_url %}
+                        <a href="{{ profile.github_url }}" target="_blank" class="text-gray-400 hover:text-primary-400 transition-colors">
+                            <i class="fab fa-github text-xl"></i>
+                        </a>
+                        {% endif %}
+                        {% if profile.twitter_url %}
+                        <a href="{{ profile.twitter_url }}" target="_blank" class="text-gray-400 hover:text-primary-400 transition-colors">
+                            <i class="fab fa-twitter text-xl"></i>
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <!-- Quick Links -->
+                <div>
+                    <h3 class="text-lg font-semibold mb-4">Quick Links</h3>
+                    <ul class="space-y-2">
+                        <li><a href="{% url 'main:home' %}" class="text-gray-400 hover:text-primary-400 transition-colors">Home</a></li>
+                        <li><a href="{% url 'main:about' %}" class="text-gray-400 hover:text-primary-400 transition-colors">About</a></li>
+                        <li><a href="{% url 'projects:project_list' %}" class="text-gray-400 hover:text-primary-400 transition-colors">Projects</a></li>
+                        <li><a href="{% url 'blog:blog_list' %}" class="text-gray-400 hover:text-primary-400 transition-colors">Blog</a></li>
+                        <li><a href="{% url 'main:contact' %}" class="text-gray-400 hover:text-primary-400 transition-colors">Contact</a></li>
+                    </ul>
+                </div>
+                
+                <!-- Contact Info -->
+                <div>
+                    <h3 class="text-lg font-semibold mb-4">Contact</h3>
+                    <ul class="space-y-2 text-gray-400">
+                        {% if profile.email %}
+                        <li><i class="fas fa-envelope mr-2"></i>{{ profile.email }}</li>
+                        {% endif %}
+                        {% if profile.phone %}
+                        <li><i class="fas fa-phone mr-2"></i>{{ profile.phone }}</li>
+                        {% endif %}
+                        {% if profile.location %}
+                        <li><i class="fas fa-map-marker-alt mr-2"></i>{{ profile.location }}</li>
+                        {% endif %}
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="border-t border-gray-700 pt-8 mt-8 text-center">
+                <p class="text-gray-400">&copy; {% now "Y" %} AI DNAs. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+    
+    <!-- JavaScript -->
+    <script>
+        // Mobile menu toggle
+        document.querySelector('.mobile-menu-button').addEventListener('click', function() {
+            document.querySelector('.mobile-menu').classList.toggle('hidden');
+        });
+        
+        // Newsletter form
+        document.getElementById('newsletter-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const formData = new FormData(this);
+            
+            fetch('{% url "main:newsletter_signup" %}', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRFToken': formData.get('csrfmiddlewaretoken')
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Successfully subscribed!');
+                    this.reset();
+                } else {
+                    alert(data.message);
+                }
+            })
+            .catch(error => {
+                alert('An error occurred. Please try again.');
+            });
+        });
+        
+        // Smooth scrolling for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        });
+    </script>
+    
+    {% block extra_js %}{% endblock %}
+    
+    <!-- Chat Widget (DISABLED) -->
+    <!--
+    <div class="chat-widget">
+        <button class="chat-button" onclick="toggleChat()">
+            <i class="fas fa-comments text-xl"></i>
+        </button>
+        
+        <div class="chat-popup" id="chatPopup">
+            <div class="chat-header">
+                <div>
+                    <h4 class="font-semibold">AI DNAs Assistant</h4>
+                    <p class="text-sm opacity-90">Ask me anything!</p>
+                </div>
+                <button onclick="toggleChat()" class="text-white hover:opacity-70">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <div class="chat-messages" id="chatMessages">
+                <div class="message bot">
+                    👋 Hi! I'm here to help you learn about AI DNAs. Ask me about projects, services, or anything else!
+                </div>
+            </div>
+            
+            <div class="chat-input">
+                <input type="text" id="chatInput" placeholder="Type your message..." 
+                       onkeypress="handleChatInput(event)">
+            </div>
+        </div>
+    </div>
+
+    <!-- Chat Widget JavaScript (DISABLED) -->
+    <script>
+        const chatResponses = {
+            'hello': 'Hi there! How can I help you today?',
+            'hi': 'Hello! Welcome to AI DNAs. What would you like to know?',
+            'services': 'I offer AI automation, web development, and consulting services. You can check out my projects at /projects/ or contact me for more details.',
+            'projects': 'I have several AI automation projects including n8n workflows, custom APIs, and web applications. Check them out at /projects/',
+            'contact': 'You can reach me at john@aidnas.com or use the contact form at /contact/. I\'d love to hear from you!',
+            'blog': 'I write about AI automation, n8n workflows, and development insights. Check out my blog at /blog/',
+            'automation': 'I specialize in AI automation using n8n, custom APIs, and workflow optimization. Would you like to see some examples?',
+            'n8n': 'I create custom n8n workflows for automation. I\'ve built APIs and integrations that work seamlessly with n8n. Check out my projects!',
+            'hire': 'I\'m available for freelance projects and consulting. Contact me at john@aidnas.com to discuss your needs.',
+            'price': 'My rates vary based on project complexity. Contact me at john@aidnas.com for a custom quote.',
+            'help': 'I can help you with questions about my services, projects, or how to get in touch. What would you like to know?'
+        };
+
+        function toggleChat() {
+            const popup = document.getElementById('chatPopup');
+            popup.style.display = popup.style.display === 'flex' ? 'none' : 'flex';
+        }
+
+        function addMessage(message, isUser = false) {
+            const messages = document.getElementById('chatMessages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${isUser ? 'user' : 'bot'}`;
+            messageDiv.textContent = message;
+            messages.appendChild(messageDiv);
+            messages.scrollTop = messages.scrollHeight;
+        }
+
+        function getResponse(userMessage) {
+            const lowerMessage = userMessage.toLowerCase();
+            
+            // Check for exact matches
+            for (const [key, response] of Object.entries(chatResponses)) {
+                if (lowerMessage.includes(key)) {
+                    return response;
+                }
+            }
+            
+            // Default response
+            return 'Thanks for your message! For specific questions about my services or projects, please email me at john@aidnas.com or use the contact form.';
+        }
+
+        function handleChatInput(event) {
+            if (event.key === 'Enter') {
+                const input = document.getElementById('chatInput');
+                const message = input.value.trim();
+                
+                if (message) {
+                    addMessage(message, true);
+                    input.value = '';
+                    
+                    // Simulate typing delay
+                    setTimeout(() => {
+                        const response = getResponse(message);
+                        addMessage(response);
+                    }, 500);
+                }
+            }
+        }
+
+        // Track chat interactions with analytics
+        function trackChatInteraction(action) {
+            if (typeof gtag !== 'undefined') {
+                gtag('event', 'chat_interaction', {
+                    'event_category': 'engagement',
+                    'event_label': action
+                });
+            }
+        }
+    </script>
+    -->
+</body>
+</html> 

@@ -1,0 +1,227 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ profile.name }} - {{ profile.title }}{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="relative min-h-screen flex items-center justify-center overflow-hidden">
+    <!-- Background Pattern -->
+    <div class="absolute inset-0 bg-gradient-to-br from-gray-900 via-blue-900 to-purple-900"></div>
+    <div class="absolute inset-0 bg-black bg-opacity-50"></div>
+    
+    <!-- Animated Background Circles -->
+    <div class="absolute top-20 left-20 w-72 h-72 bg-primary-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse"></div>
+    <div class="absolute top-40 right-20 w-96 h-96 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse animation-delay-2s"></div>
+    <div class="absolute bottom-20 left-40 w-80 h-80 bg-accent-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse animation-delay-4s"></div>
+    
+    <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <div class="max-w-4xl mx-auto">
+            {% if profile.profile_image %}
+            <div class="mb-8">
+                <img src="{{ profile.profile_image.url }}" alt="{{ profile.name }}" class="w-32 h-32 rounded-full mx-auto border-4 border-white shadow-lg">
+            </div>
+            {% endif %}
+            
+            <h1 class="text-5xl md:text-7xl font-bold mb-6">
+                <span class="text-white">Hello, I'm </span>
+                <span class="text-gradient">{{ profile.name|default:"John" }}</span>
+            </h1>
+            
+            <p class="text-xl md:text-2xl text-gray-300 mb-4">{{ profile.title|default:"AI Developer & Automation Specialist" }}</p>
+            
+            <p class="text-2xl md:text-3xl font-semibold text-primary-400 mb-8">
+                {{ profile.tagline|default:"Automating the Future: One Bot at a Time" }}
+            </p>
+            
+            <p class="text-lg text-gray-400 mb-12 max-w-3xl mx-auto leading-relaxed">
+                {{ profile.bio|default:"Passionate about creating intelligent solutions that automate manual work and enhance productivity. Father of 2, dedicated to building the future of AI-powered automation." }}
+            </p>
+            
+            <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                <a href="{% url 'projects:project_list' %}" class="bg-primary-600 hover:bg-primary-700 text-white px-8 py-4 rounded-lg font-semibold text-lg transition-all transform hover:scale-105 shadow-lg">
+                    <i class="fas fa-rocket mr-2"></i>Discover My Work
+                </a>
+                <a href="{% url 'main:recruiter' %}" class="bg-transparent border-2 border-white text-white hover:bg-white hover:text-gray-900 px-8 py-4 rounded-lg font-semibold text-lg transition-all transform hover:scale-105">
+                    <i class="fas fa-user-tie mr-2"></i>Hire Me
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Scroll Indicator -->
+    <div class="absolute bottom-8 left-1/2 transform -translate-x-1/2">
+        <a href="#featured-projects" class="text-white animate-bounce">
+            <i class="fas fa-chevron-down text-2xl"></i>
+        </a>
+    </div>
+</section>
+
+<!-- Featured Projects Section -->
+{% if featured_projects %}
+<section id="featured-projects" class="py-20 bg-gray-800">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-16">
+            <h2 class="text-4xl font-bold text-white mb-4">Featured Projects</h2>
+            <p class="text-xl text-gray-400 max-w-2xl mx-auto">Explore my latest AI-powered solutions that are making a real impact</p>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {% for project in featured_projects %}
+            <div class="bg-gray-900 rounded-xl shadow-xl overflow-hidden transform hover:scale-105 transition-all duration-300 border border-gray-700 hover:border-primary-500">
+                {% if project.featured_image %}
+                <div class="h-48 bg-gradient-to-br from-primary-500 to-purple-600 relative overflow-hidden">
+                    <img src="{{ project.featured_image.url }}" alt="{{ project.name }}" class="w-full h-full object-cover">
+                    <div class="absolute top-4 right-4">
+                        <span class="bg-accent-500 text-white px-3 py-1 rounded-full text-sm font-medium">
+                            {{ project.get_status_display }}
+                        </span>
+                    </div>
+                </div>
+                {% else %}
+                <div class="h-48 bg-gradient-to-br from-primary-500 to-purple-600 flex items-center justify-center">
+                    <i class="fas fa-rocket text-6xl text-white opacity-50"></i>
+                </div>
+                {% endif %}
+                
+                <div class="p-6">
+                    <h3 class="text-xl font-semibold text-white mb-2">{{ project.name }}</h3>
+                    <p class="text-gray-400 mb-4">{{ project.short_description|truncatewords:20 }}</p>
+                    
+                    <div class="flex flex-wrap gap-2 mb-4">
+                        {% for tech in project.technologies.all|slice:":3" %}
+                        <span class="bg-gray-700 text-gray-300 px-2 py-1 rounded text-sm">{{ tech.name }}</span>
+                        {% endfor %}
+                    </div>
+                    
+                    <div class="flex space-x-4">
+                        {% if project.live_url %}
+                        <a href="{{ project.live_url }}" target="_blank" class="text-primary-400 hover:text-primary-300 transition-colors">
+                            <i class="fas fa-external-link-alt mr-1"></i>Live Demo
+                        </a>
+                        {% endif %}
+                        <a href="{% url 'projects:project_detail' project.slug %}" class="text-accent-400 hover:text-accent-300 transition-colors">
+                            <i class="fas fa-info-circle mr-1"></i>Learn More
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <div class="text-center mt-12">
+            <a href="{% url 'projects:project_list' %}" class="bg-primary-600 hover:bg-primary-700 text-white px-8 py-3 rounded-lg font-semibold transition-colors">
+                View All Projects
+            </a>
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<!-- Latest Blog Posts -->
+{% if latest_posts %}
+<section class="py-20 bg-gray-900">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-16">
+            <h2 class="text-4xl font-bold text-white mb-4">Latest Insights</h2>
+            <p class="text-xl text-gray-400 max-w-2xl mx-auto">Thoughts on AI, automation, and the future of technology</p>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {% for post in latest_posts %}
+            <article class="bg-gray-800 rounded-xl shadow-xl overflow-hidden transform hover:scale-105 transition-all duration-300 border border-gray-700 hover:border-primary-500">
+                {% if post.featured_image %}
+                <div class="h-48 overflow-hidden">
+                    <img src="{{ post.featured_image.url }}" alt="{{ post.title }}" class="w-full h-full object-cover">
+                </div>
+                {% else %}
+                <div class="h-48 bg-gradient-to-br from-purple-500 to-blue-600 flex items-center justify-center">
+                    <i class="fas fa-blog text-6xl text-white opacity-50"></i>
+                </div>
+                {% endif %}
+                
+                <div class="p-6">
+                    {% if post.category %}
+                    <span class="inline-block bg-{{ post.category.color|default:'primary-500' }} text-white px-3 py-1 rounded-full text-sm font-medium mb-2">
+                        {{ post.category.name }}
+                    </span>
+                    {% endif %}
+                    
+                    <h3 class="text-xl font-semibold text-white mb-2 line-clamp-2">{{ post.title }}</h3>
+                    <p class="text-gray-400 mb-4 line-clamp-3">{{ post.excerpt }}</p>
+                    
+                    <div class="flex items-center justify-between text-sm text-gray-500">
+                        <span><i class="fas fa-clock mr-1"></i>{{ post.reading_time }} min read</span>
+                        <span>{{ post.published_date|date:"M d, Y" }}</span>
+                    </div>
+                    
+                    <a href="{% url 'blog:blog_detail' post.slug %}" class="inline-block mt-4 text-primary-400 hover:text-primary-300 font-medium transition-colors">
+                        Read More <i class="fas fa-arrow-right ml-1"></i>
+                    </a>
+                </div>
+            </article>
+            {% endfor %}
+        </div>
+        
+        <div class="text-center mt-12">
+            <a href="{% url 'blog:blog_list' %}" class="bg-primary-600 hover:bg-primary-700 text-white px-8 py-3 rounded-lg font-semibold transition-colors">
+                View All Posts
+            </a>
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<!-- Testimonials Section -->
+{% if featured_testimonials %}
+<section class="py-20 bg-gray-800">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-16">
+            <h2 class="text-4xl font-bold text-white mb-4">What People Say</h2>
+            <p class="text-xl text-gray-400">Feedback from clients and colleagues</p>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            {% for testimonial in featured_testimonials %}
+            <div class="bg-gray-900 p-8 rounded-xl shadow-xl border border-gray-700">
+                <div class="flex items-center mb-6">
+                    {% if testimonial.image %}
+                    <img src="{{ testimonial.image.url }}" alt="{{ testimonial.name }}" class="w-16 h-16 rounded-full mr-4">
+                    {% else %}
+                    <div class="w-16 h-16 bg-gradient-to-br from-primary-500 to-purple-600 rounded-full flex items-center justify-center mr-4">
+                        <span class="text-white font-bold text-xl">{{ testimonial.name|first }}</span>
+                    </div>
+                    {% endif %}
+                    <div>
+                        <h4 class="text-white font-semibold">{{ testimonial.name }}</h4>
+                        <p class="text-gray-400">{{ testimonial.position }} at {{ testimonial.company }}</p>
+                    </div>
+                </div>
+                <blockquote class="text-gray-300 italic text-lg leading-relaxed">
+                    "{{ testimonial.content }}"
+                </blockquote>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<!-- CTA Section -->
+<section class="py-20 bg-gradient-to-r from-primary-600 to-purple-600">
+    <div class="max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8">
+        <h2 class="text-4xl font-bold text-white mb-4">Ready to Build Something Amazing?</h2>
+        <p class="text-xl text-gray-100 mb-8">Let's discuss how AI and automation can transform your business</p>
+        
+        <div class="flex flex-col sm:flex-row gap-4 justify-center">
+            <a href="{% url 'main:contact' %}" class="bg-white text-primary-600 px-8 py-4 rounded-lg font-semibold text-lg transition-all transform hover:scale-105 shadow-lg">
+                <i class="fas fa-envelope mr-2"></i>Get In Touch
+            </a>
+            {% if profile.cv_file %}
+            <a href="{{ profile.cv_file.url }}" target="_blank" class="bg-transparent border-2 border-white text-white hover:bg-white hover:text-primary-600 px-8 py-4 rounded-lg font-semibold text-lg transition-all transform hover:scale-105">
+                <i class="fas fa-download mr-2"></i>Download CV
+            </a>
+            {% endif %}
+        </div>
+    </div>
+</section>
+{% endblock %} 
